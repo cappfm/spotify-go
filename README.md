@@ -17,7 +17,7 @@ By using this library you agree to Spotify's
 
 To install the library, simply
 
-`go get github.com/zmb3/spotify/v2`
+`go get github.com/cappfm/spotify-go/v2`
 
 ## Authentication
 

@@ -2,7 +2,7 @@
 // In order to run this example yourself, you'll need to:
 //
 //  1. Register an application at: https://developer.spotify.com/my-applications/
-//       - Use "http://localhost:8080/callback" as the redirect URI
+//     - Use "http://localhost:8080/callback" as the redirect URI
 //  2. Set the SPOTIFY_ID environment variable to the client ID you got in step 1.
 //  3. Set the SPOTIFY_SECRET environment variable to the client secret from step 1.
 package main
@@ -10,11 +10,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/zmb3/spotify/v2/auth"
+	"github.com/cappfm/spotify-go/v2/auth"
 	"log"
 	"net/http"
 
-	"github.com/zmb3/spotify/v2"
+	"github.com/cappfm/spotify-go/v2"
 )
 
 // redirectURI is the OAuth redirect URI for the application.
