@@ -224,7 +224,9 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 
 		if c.autoRetry && shouldRetry(resp.StatusCode) {
 			logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
-			time.Sleep(retryDuration(resp))
+			if err := sleep(req.Context(), retryDuration(resp)); err != nil {
+				return err
+			}
 			continue
 		}
 		if resp.StatusCode == http.StatusNoContent {
@@ -283,7 +285,9 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 
 		if resp.StatusCode == rateLimitExceededStatusCode && c.autoRetry {
 			logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
-			time.Sleep(retryDuration(resp))
+			if err := sleep(ctx, retryDuration(resp)); err != nil {
+				return err
+			}
 			continue
 		}
 		if resp.StatusCode == http.StatusNoContent {
@@ -338,4 +342,15 @@ func (c *Client) Token() (*oauth2.Token, error) {
 		return nil, err
 	}
 	return t, nil
+}
+
+func sleep(ctx context.Context, dur time.Duration) error {
+	select {
+	case <-ctx.Done():
+		break
+	case <-time.After(dur):
+		break
+	}
+
+	return ctx.Err()
 }
