@@ -206,21 +206,21 @@ func isFailure(code int, validCodes []int) bool {
 // status codes that will be treated as success. Note that we allow all 200s
 // even if there are additional success codes that represent success.
 func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...int) error {
-	logger := log.Ctx(req.Context()).With().Str("spotify", req.URL.String()).Logger()
+	logger := log.Ctx(req.Context()).With().Bool(":spotify", true).Str("spotify", req.URL.String()).Logger()
 
 	if c.acceptLanguage != "" {
 		req.Header.Set("Accept-Language", c.acceptLanguage)
 	}
 	for {
 		beforeReq := time.Now().UTC()
-		logger.Trace().Send()
+		logger.Trace().Bool(":spotify-req", true).Send()
 		resp, err := c.http.Do(req)
 		if err != nil {
 			logger.Error().Err(err).Send()
 			return err
 		}
 		defer resp.Body.Close()
-		logger.Trace().Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
+		logger.Trace().Bool(":spotify-resp", true).Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
 
 		if c.autoRetry && shouldRetry(resp.StatusCode) {
 			logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
@@ -261,11 +261,11 @@ func retryDuration(resp *http.Response) time.Duration {
 }
 
 func (c *Client) get(ctx context.Context, url string, result interface{}) error {
-	logger := log.Ctx(ctx).With().Str("spotify", url).Logger()
+	logger := log.Ctx(ctx).With().Bool(":spotify", true).Str("spotify", url).Logger()
 
 	for {
 		beforeReq := time.Now().UTC()
-		logger.Trace().Send()
+		logger.Trace().Bool(":spotify-req", true).Send()
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if c.acceptLanguage != "" {
 			req.Header.Set("Accept-Language", c.acceptLanguage)
@@ -279,7 +279,7 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			logger.Error().Err(err).Send()
 			return err
 		}
-		logger.Trace().Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
+		logger.Trace().Bool(":spotify-resp", true).Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
 
 		defer resp.Body.Close()
 
