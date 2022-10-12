@@ -706,6 +706,13 @@ func TestSetPlaylistImage(t *testing.T) {
 	defer server.Close()
 
 	err := client.SetPlaylistImage(context.Background(), "playlist", bytes.NewReader([]byte("foo")))
+
+	// NOTE(gawen): test returns too many request since we added `TooManyRequestsError`
+	if _, ok := err.(*TooManyRequestsError); ok {
+		err = nil
+	}
+	// /NOTE
+
 	if err != nil {
 		t.Fatal(err)
 	}

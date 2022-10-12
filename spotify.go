@@ -222,12 +222,16 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 		defer resp.Body.Close()
 		logger.Trace().Bool(":spotify-resp", true).Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
 
-		if c.autoRetry && shouldRetry(resp.StatusCode) {
-			logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
-			if err := sleep(req.Context(), retryDuration(resp)); err != nil {
-				return err
+		if shouldRetry(resp.StatusCode) {
+			if c.autoRetry {
+				logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
+				if err := sleep(req.Context(), retryDuration(resp)); err != nil {
+					return err
+				}
+				continue
+			} else {
+				return &TooManyRequestsError{retryDuration(resp)}
 			}
-			continue
 		}
 		if resp.StatusCode == http.StatusNoContent {
 			return nil
@@ -283,12 +287,16 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 
 		defer resp.Body.Close()
 
-		if resp.StatusCode == rateLimitExceededStatusCode && c.autoRetry {
-			logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
-			if err := sleep(ctx, retryDuration(resp)); err != nil {
-				return err
+		if resp.StatusCode == rateLimitExceededStatusCode {
+			if c.autoRetry {
+				logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
+				if err := sleep(ctx, retryDuration(resp)); err != nil {
+					return err
+				}
+				continue
+			} else {
+				return &TooManyRequestsError{retryDuration(resp)}
 			}
-			continue
 		}
 		if resp.StatusCode == http.StatusNoContent {
 			return nil
