@@ -215,12 +215,19 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 		beforeReq := time.Now().UTC()
 		logger.Trace().Bool(":spotify-req", true).Send()
 		resp, err := c.http.Do(req)
+
+		logger.Trace().
+			Bool(":spotify-resp", true).
+			Err(err).
+			Dur("ellapsed", time.Since(beforeReq)).
+			Int("status", resp.StatusCode).
+			Interface("header", resp.Header).
+			Send()
+
 		if err != nil {
-			logger.Error().Err(err).Send()
 			return err
 		}
 		defer resp.Body.Close()
-		logger.Trace().Bool(":spotify-resp", true).Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
 
 		if shouldRetry(resp.StatusCode) {
 			if c.autoRetry {
@@ -279,12 +286,18 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			return err
 		}
 		resp, err := c.http.Do(req)
+
+		logger.Trace().
+			Bool(":spotify-resp", true).
+			Err(err).
+			Dur("ellapsed", time.Since(beforeReq)).
+			Int("status", resp.StatusCode).
+			Interface("header", resp.Header).
+			Send()
+
 		if err != nil {
-			logger.Error().Err(err).Send()
 			return err
 		}
-		logger.Trace().Bool(":spotify-resp", true).Dur("ellapsed", time.Since(beforeReq)).Int("status", resp.StatusCode).Send()
-
 		defer resp.Body.Close()
 
 		if resp.StatusCode == rateLimitExceededStatusCode {
