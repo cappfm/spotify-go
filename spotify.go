@@ -216,11 +216,15 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 		logger.Trace().Bool(":spotify-req", true).Send()
 		resp, err := c.http.Do(req)
 
+		var statusCode int
+		if resp != nil {
+			statusCode = resp.StatusCode
+		}
 		logger.Trace().
 			Bool(":spotify-resp", true).
 			Err(err).
 			Dur("ellapsed", time.Since(beforeReq)).
-			Int("status", resp.StatusCode).
+			Int("status", statusCode).
 			Interface("header", resp.Header).
 			Send()
 
@@ -287,12 +291,15 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 		}
 		resp, err := c.http.Do(req)
 
+		var statusCode int
+		if resp != nil {
+			statusCode = resp.StatusCode
+		}
 		logger.Trace().
 			Bool(":spotify-resp", true).
 			Err(err).
 			Dur("ellapsed", time.Since(beforeReq)).
-			Int("status", resp.StatusCode).
-			Interface("header", resp.Header).
+			Int("status", statusCode).
 			Send()
 
 		if err != nil {
