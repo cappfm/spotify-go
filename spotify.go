@@ -225,7 +225,6 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 			Err(err).
 			Dur("ellapsed", time.Since(beforeReq)).
 			Int("status", statusCode).
-			Interface("header", resp.Header).
 			Send()
 
 		if err != nil {
