@@ -335,6 +335,10 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 	return nil
 }
 
+func (c *Client) Get(ctx context.Context, path string, result interface{}) error {
+	return c.get(ctx, c.baseURL+path, result)
+}
+
 // NewReleases gets a list of new album releases featured in Spotify.
 // Supported options: Country, Limit, Offset
 func (c *Client) NewReleases(ctx context.Context, opts ...RequestOption) (albums *SimpleAlbumPage, err error) {
