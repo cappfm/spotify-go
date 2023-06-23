@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"time"
 
+	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"golang.org/x/oauth2"
 
 	"github.com/rs/zerolog/log"
@@ -220,10 +221,18 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 		if resp != nil {
 			statusCode = resp.StatusCode
 		}
+		ellapsed := time.Since(beforeReq)
+
+		// observability: metrics
+		// observability: logs
+		metricLatencyHist.Record(req.Context(), int64(ellapsed/time.Millisecond),
+			semconv.HTTPStatusCode(statusCode),
+			semconv.HTTPRoute(req.URL.Path),
+		)
 		logger.Trace().
 			Bool(":spotify-resp", true).
 			Err(err).
-			Dur("ellapsed", time.Since(beforeReq)).
+			Dur("ellapsed", ellapsed).
 			Int("status", statusCode).
 			Send()
 
@@ -289,15 +298,20 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			return err
 		}
 		resp, err := c.http.Do(req)
+		ellapsed := time.Since(beforeReq)
 
 		var statusCode int
 		if resp != nil {
 			statusCode = resp.StatusCode
 		}
+		metricLatencyHist.Record(req.Context(), int64(ellapsed/time.Millisecond),
+			semconv.HTTPStatusCode(statusCode),
+			semconv.HTTPRoute(req.URL.Path),
+		)
 		logger.Trace().
 			Bool(":spotify-resp", true).
 			Err(err).
-			Dur("ellapsed", time.Since(beforeReq)).
+			Dur("ellapsed", ellapsed).
 			Int("status", statusCode).
 			Send()
 
