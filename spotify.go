@@ -229,12 +229,21 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 			semconv.HTTPStatusCode(statusCode),
 			semconv.HTTPRoute(req.URL.Path),
 		)
-		logger.Trace().
+
+		L := logger.With().
 			Bool(":spotify-resp", true).
 			Err(err).
 			Dur("ellapsed", ellapsed).
 			Int("status", statusCode).
-			Send()
+			Logger()
+
+		switch resp.StatusCode {
+		case rateLimitExceededStatusCode:
+			retryAfter := resp.Header.Get("retry-after")
+			L.Warn().Str("retryAfter", retryAfter).Send()
+		default:
+			L.Trace().Send()
+		}
 
 		if err != nil {
 			return err
@@ -308,12 +317,21 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			semconv.HTTPStatusCode(statusCode),
 			semconv.HTTPRoute(req.URL.Path),
 		)
-		logger.Trace().
+
+		L := logger.With().
 			Bool(":spotify-resp", true).
 			Err(err).
 			Dur("ellapsed", ellapsed).
 			Int("status", statusCode).
-			Send()
+			Logger()
+
+		switch resp.StatusCode {
+		case rateLimitExceededStatusCode:
+			retryAfter := resp.Header.Get("retry-after")
+			L.Warn().Str("retryAfter", retryAfter).Send()
+		default:
+			L.Trace().Send()
+		}
 
 		if err != nil {
 			return err
