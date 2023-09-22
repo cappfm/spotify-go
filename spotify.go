@@ -237,7 +237,7 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 			Int("status", statusCode).
 			Logger()
 
-		switch resp.StatusCode {
+		switch statusCode {
 		case rateLimitExceededStatusCode:
 			retryAfter := resp.Header.Get("retry-after")
 			L.Warn().Str("retryAfter", retryAfter).Send()
@@ -325,7 +325,7 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			Int("status", statusCode).
 			Logger()
 
-		switch resp.StatusCode {
+		switch statusCode {
 		case rateLimitExceededStatusCode:
 			retryAfter := resp.Header.Get("retry-after")
 			L.Warn().Str("retryAfter", retryAfter).Send()
