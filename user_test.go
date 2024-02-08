@@ -44,7 +44,7 @@ func TestUserProfile(t *testing.T) {
 		t.Error("Expected user wizzler, got ", user.ID)
 	}
 	if f := user.Followers.Count; f != 3829 {
-		t.Errorf("Expected 3829 followers, got %d\n", f)
+		t.Errorf("Expected 3829 followers, got %f\n", f)
 	}
 }
 
@@ -398,7 +398,7 @@ func TestCurrentUsersTopArtists(t *testing.T) {
 		return
 	}
 	if artists.Artists[0].Followers.Count != 8437 {
-		t.Errorf("Expected follower count of 8437, got %d\n", artists.Artists[0].Followers.Count)
+		t.Errorf("Expected follower count of 8437, got %f\n", artists.Artists[0].Followers.Count)
 	}
 
 	name := "insaneintherainmusic"

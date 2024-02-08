@@ -109,7 +109,7 @@ func (id *ID) String() string {
 // particular artist or playlist.
 type Followers struct {
 	// The total number of followers.
-	Count uint `json:"total"`
+	Count float64 `json:"total"`
 	// A link to the Web API endpoint providing full details of the followers,
 	// or the empty string if this data is not available.
 	Endpoint string `json:"href"`
@@ -118,9 +118,9 @@ type Followers struct {
 // Image identifies an image associated with an item.
 type Image struct {
 	// The image height, in pixels.
-	Height int `json:"height"`
+	Height float64 `json:"height"`
 	// The image width, in pixels.
-	Width int `json:"width"`
+	Width float64 `json:"width"`
 	// The source URL of the image.
 	URL string `json:"url"`
 }

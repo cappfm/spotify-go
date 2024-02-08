@@ -88,7 +88,7 @@ func TestFindArtist(t *testing.T) {
 		t.Fatal(err)
 	}
 	if followers := artist.Followers.Count; followers != 2265279 {
-		t.Errorf("Got %d followers, want 2265279\n", followers)
+		t.Errorf("Got %f followers, want 2265279\n", followers)
 	}
 	if artist.Name != "Pitbull" {
 		t.Error("Got ", artist.Name, ", wanted Pitbull")
@@ -132,7 +132,7 @@ func TestRelatedArtists(t *testing.T) {
 		t.Error("Expected Carl Perkins, got ", a2.Name)
 	}
 	if a2.Popularity != 54 {
-		t.Errorf("Expected popularity 54, got %d\n", a2.Popularity)
+		t.Errorf("Expected popularity 54, got %f\n", a2.Popularity)
 	}
 }
 
