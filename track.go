@@ -15,9 +15,9 @@ type SimpleTrack struct {
 	// identified by their ISO 3166-1 alpha-2 codes.
 	AvailableMarkets []string `json:"available_markets"`
 	// The disc number (usually 1 unless the album consists of more than one disc).
-	DiscNumber int `json:"disc_number"`
+	DiscNumber float32 `json:"disc_number"`
 	// The length of the track, in milliseconds.
-	Duration int `json:"duration_ms"`
+	Duration float32 `json:"duration_ms"`
 	// Whether or not the track has explicit lyrics.
 	// true => yes, it does; false => no, it does not.
 	Explicit bool `json:"explicit"`
@@ -32,8 +32,8 @@ type SimpleTrack struct {
 	// The number of the track.  If an album has several
 	// discs, the track number is the number on the specified
 	// DiscNumber.
-	TrackNumber int `json:"track_number"`
-	URI         URI `json:"uri"`
+	TrackNumber float32 `json:"track_number"`
+	URI         URI     `json:"uri"`
 	// Type of the track
 	Type string `json:"type"`
 }
@@ -71,7 +71,7 @@ type FullTrack struct {
 	// Popularity of the track.  The value will be between 0 and 100,
 	// with 100 being the most popular.  The popularity is calculated from
 	// both total plays and most recent plays.
-	Popularity int `json:"popularity"`
+	Popularity float32 `json:"popularity"`
 
 	// IsPlayable defines if the track is playable. It's reported when the "market" parameter is passed to the tracks
 	// listing API.

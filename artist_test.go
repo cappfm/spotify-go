@@ -112,7 +112,7 @@ func TestArtistTopTracks(t *testing.T) {
 		t.Error("Incorrect track name")
 	}
 	if track.TrackNumber != 24 {
-		t.Errorf("Track number was %d, expected 24\n", track.TrackNumber)
+		t.Errorf("Track number was %.0f, expected 24\n", track.TrackNumber)
 	}
 }
 

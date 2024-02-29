@@ -23,7 +23,7 @@ type AudioFeatures struct {
 	// and 1.0 is most danceable.
 	Danceability float32 `json:"danceability"`
 	// The length of the track in milliseconds.
-	Duration int `json:"duration_ms"`
+	Duration float32 `json:"duration_ms"`
 	// Energy is a measure from 0.0 to 1.0 and represents a perceptual measure
 	// of intensity and activity.  Typically, energetic tracks feel fast, loud,
 	// and noisy.
