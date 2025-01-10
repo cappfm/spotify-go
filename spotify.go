@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,8 +18,6 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"golang.org/x/oauth2"
-
-	"github.com/rs/zerolog/log"
 )
 
 // Version is the version of this library.
@@ -208,14 +207,14 @@ func isFailure(code int, validCodes []int) bool {
 // status codes that will be treated as success. Note that we allow all 200s
 // even if there are additional success codes that represent success.
 func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...int) error {
-	logger := log.Ctx(req.Context()).With().Bool(":spotify", true).Str("spotify", req.URL.String()).Logger()
+	logger := slog.With(":spotify", true, "url", req.URL.String())
 
 	if c.acceptLanguage != "" {
 		req.Header.Set("Accept-Language", c.acceptLanguage)
 	}
 	for {
 		beforeReq := time.Now().UTC()
-		logger.Trace().Bool(":spotify-req", true).Send()
+		logger.DebugContext(req.Context(), "request spotify")
 		resp, err := c.http.Do(req)
 
 		var statusCode int
@@ -233,19 +232,16 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 			),
 		)
 
-		L := logger.With().
-			Bool(":spotify-resp", true).
-			Err(err).
-			Dur("ellapsed", ellapsed).
-			Int("status", statusCode).
-			Logger()
-
 		switch statusCode {
 		case rateLimitExceededStatusCode:
 			retryAfter := resp.Header.Get("retry-after")
-			L.Warn().Str("retryAfter", retryAfter).Send()
+			slog.WarnContext(req.Context(), "will retry...",
+				":spotify-resp", true, "err", err, "ellapsed", ellapsed,
+				"status", statusCode, "retryAfter", retryAfter)
 		default:
-			L.Trace().Send()
+			slog.DebugContext(req.Context(), "spotify response",
+				":spotify-resp", true, "err", err, "ellapsed", ellapsed,
+				"status", statusCode)
 		}
 
 		if err != nil {
@@ -255,7 +251,7 @@ func (c *Client) execute(req *http.Request, result interface{}, needsStatus ...i
 
 		if shouldRetry(resp.StatusCode) {
 			if c.autoRetry {
-				logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
+				logger.WarnContext(req.Context(), "rate limit exceeded", "retry", retryDuration(resp))
 				if err := sleep(req.Context(), retryDuration(resp)); err != nil {
 					return err
 				}
@@ -296,17 +292,17 @@ func retryDuration(resp *http.Response) time.Duration {
 }
 
 func (c *Client) get(ctx context.Context, url string, result interface{}) error {
-	logger := log.Ctx(ctx).With().Bool(":spotify", true).Str("spotify", url).Logger()
+	logger := slog.With(":spotify", true, "url", url)
 
 	for {
 		beforeReq := time.Now().UTC()
-		logger.Trace().Bool(":spotify-req", true).Send()
+		logger.DebugContext(ctx, "request spotify", ":spotify-req", true)
 		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 		if c.acceptLanguage != "" {
 			req.Header.Set("Accept-Language", c.acceptLanguage)
 		}
 		if err != nil {
-			logger.Error().Err(err).Send()
+			logger.ErrorContext(ctx, "unable to request spotify", "err", err)
 			return err
 		}
 		resp, err := c.http.Do(req)
@@ -323,19 +319,16 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			),
 		)
 
-		L := logger.With().
-			Bool(":spotify-resp", true).
-			Err(err).
-			Dur("ellapsed", ellapsed).
-			Int("status", statusCode).
-			Logger()
-
 		switch statusCode {
 		case rateLimitExceededStatusCode:
 			retryAfter := resp.Header.Get("retry-after")
-			L.Warn().Str("retryAfter", retryAfter).Send()
+			slog.WarnContext(req.Context(), "will retry...",
+				":spotify-resp", true, "err", err, "ellapsed", ellapsed,
+				"status", statusCode, "retryAfter", retryAfter)
 		default:
-			L.Trace().Send()
+			slog.DebugContext(req.Context(), "will retry...",
+				":spotify-resp", true, "err", err, "ellapsed", ellapsed,
+				"status", statusCode)
 		}
 
 		if err != nil {
@@ -345,7 +338,7 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 
 		if resp.StatusCode == rateLimitExceededStatusCode {
 			if c.autoRetry {
-				logger.Warn().Dur("retry", retryDuration(resp)).Msg("rate limit exceeded")
+				logger.WarnContext(ctx, "rate limit exceeded", "retry", retryDuration(resp))
 				if err := sleep(ctx, retryDuration(resp)); err != nil {
 					return err
 				}
