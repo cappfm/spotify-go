@@ -325,10 +325,6 @@ func (c *Client) get(ctx context.Context, url string, result interface{}) error 
 			slog.WarnContext(req.Context(), "will retry...",
 				":spotify-resp", true, "err", err, "ellapsed", ellapsed,
 				"status", statusCode, "retryAfter", retryAfter)
-		default:
-			slog.DebugContext(req.Context(), "will retry...",
-				":spotify-resp", true, "err", err, "ellapsed", ellapsed,
-				"status", statusCode)
 		}
 
 		if err != nil {
